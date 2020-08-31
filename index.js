@@ -46,31 +46,34 @@ const addProduct = (workbook, index) => {
     });
 }
 
-const addProducts = (workbook) => {
+const addProducts = async (workbook) => {
 
-    workbook.forEach((element) => {
-        const data = {
-            name: element.Descripcion,
-            type: "simple",
-            regular_price: element['PVP 1'].toString(),
-            categories: [
-                {
-                    id: 1
-                },
-            ],
-        }
+    const send = await Promise.all(
+        workbook.map(element => {
+            const data = {
+                name: element.Descripcion,
+                type: "simple",
+                regular_price: element['PVP 1'].toString(),
+                categories: [
+                    {
+                      id: 1
+                    },
+                ],
+            }
 
-        WooCommerce.post("products", data)
-        .then((response) => {
-            console.log(response.data);
+            console.log(data)
+
+            // WooCommerce.post("products", data)
+            // .then((response) => {
+            //     console.log(response.data);
+            // })
+            // .catch((error) => {
+            //     console.log(error.response.data);
+            // });
         })
-        .catch((error) => {
-            console.log(error.response.data);
-        });
+    )
 
-        return
-    });
 }
 
 // addProduct(workbookJSON(workbook), 5);
-addProducts(workbookJSON(workbook))
+await addProducts(workbookJSON(workbook))
