@@ -48,14 +48,14 @@ const addProduct = (workbook, index) => {
 
 const addProducts = (workbook) => {
 
-    workbook.forEach( (element) => {
+    workbook.forEach((element) => {
         const data = {
             name: element.Descripcion,
             type: "simple",
             regular_price: element['PVP 1'].toString(),
             categories: [
                 {
-                  id: 1
+                    id: 1
                 },
             ],
         }
@@ -67,8 +67,10 @@ const addProducts = (workbook) => {
         .catch((error) => {
             console.log(error.response.data);
         });
+
+        return
     });
 }
 
-addProduct(workbookJSON(workbook), 5);
-// addProducts(workbookJSON(workbook))
+// addProduct(workbookJSON(workbook), 5);
+addProducts(workbookJSON(workbook))
