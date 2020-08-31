@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@woocommerce/woocommerce-rest-api": "^1.0.1",
     "xlsx": "^0.16.6"
   },
   "devDependencies": {
