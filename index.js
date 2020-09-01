@@ -1,13 +1,12 @@
 const XLSX = require('xlsx');
 const path = require('path');
 const fs = require('fs');
-const { resolve } = require('path');
 
 const workbook = XLSX.readFile(
   path.join(__dirname, 'inputs', 'articulos.xlsx'),
 );
 
-const workbookJSON = workbook => {
+const workbookToJSON = workbook => {
   const firstSheet = workbook.SheetNames[0];
   const worksheet = workbook.Sheets[firstSheet];
 
@@ -16,6 +15,23 @@ const workbookJSON = workbook => {
     defval: null,
   }));
 };
+
+const workbookJSON = workbookToJSON(workbook);
+
+const products = workbookJSON.map(item => {
+    const data = {
+        name: item.Descripcion,
+        type: 'simple',
+        regular_price: item['PVP 1'].toString(),
+        categories: [
+          {
+            id: 1,
+          },
+        ],
+      };
+
+    return data;
+})
 
 // Setup:
 const WooCommerceRestApi = require('@woocommerce/woocommerce-rest-api').default;
@@ -28,52 +44,19 @@ const WooCommerce = new WooCommerceRestApi({
   queryStringAuth: true, //Server SSL config
 });
 
-const addProduct = (workbook, index) => {
-  const data = {
-    name: workbook[index].Descripcion,
-    type: 'simple',
-    regular_price: workbook[index]['PVP 1'].toString(),
-    categories: [
-      {
-        id: 1,
-      },
-    ],
-  };
-
-  WooCommerce.post('products', data)
-    .then(response => {
-      console.log(response.data);
+const addProduct = (product) => {
+    return new Promise((resolve, reject) => {
+        resolve(
+            WooCommerce.post('products', product)
+            .then(response => {
+              console.log(response.data);
+            })
+            .catch(error => {
+              console.log(error.response.data);
+            })
+        )
     })
-    .catch(error => {
-      console.log(error.response.data);
-    });
-};
-
-const addProducts = async workbook => {
-  const send = await Promise.all(
-    workbook.map(element => {
-      const data = {
-        name: element.Descripcion,
-        type: 'simple',
-        regular_price: element['PVP 1'].toString(),
-        categories: [
-          {
-            id: 1,
-          },
-        ],
-      };
-
-      console.log(data);
-
-      // WooCommerce.post("products", data)
-      // .then((response) => {
-      //     console.log(response.data);
-      // })
-      // .catch((error) => {
-      //     console.log(error.response.data);
-      // });
-    }),
-  );
+  
 };
 
 const returnData = workbook => {
@@ -85,21 +68,8 @@ const returnData = workbook => {
   });
 };
 
-// const returnAllData = (workbook) => {
-//   return new Promise((resolve, reject) => {
-//     returnData(workbookJSON(workbook), 5).then(data => resolve(data));
-//   });
-// };
-
-const promises = workbookJSON(workbook).map(async item => {
-  const response = await returnData(item);
-
-  return response;
-});
-
-Promise.all(promises).then(value => console.log(value));
-
-// const returnAllData = returnAllData(workbookJSON(workbook));
-
-// addProduct(workbookJSON(workbook), 5);
-// await addProducts(workbookJSON(workbook));
+products.reduce(
+    (p, x) =>
+        p.then(_ => addProduct(x)),
+    Promise.resolve()
+    )
