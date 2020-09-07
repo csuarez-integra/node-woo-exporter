@@ -1,27 +1,11 @@
-const XLSX = require('xlsx');
+const XLSX = require('xlsx'); //Lector de excel
 const path = require('path');
-const scrapper = require('./images_scrapper');
+const scrapper = require('./images_scrapper'); //Scrapper de imagenes de google
 
-//Env vars
+//Variables de entorno
 require('dotenv').config();
 
-//sftp connect
-let Client = require('ssh2-sftp-client');
-let sftp = new Client();
-sftp.connect({
-  host: process.env.SFTPHOST,
-  port: process.env.SFTPPORT,
-  username: process.env.SFTPUSER,
-  password: process.env.SFTPPASSWORD
-}).then(() => {
-  return sftp.list('/clickandbuilds/');
-}).then((data) => {
-  console.log(data, 'the data info');
-}).catch((err) => {
-  console.log(err, 'catch error');
-});
-
-// Setup:
+// Setup de la API de Woocommerce
 const WooCommerceRestApi = require('@woocommerce/woocommerce-rest-api').default;
 
 const WooCommerce = new WooCommerceRestApi({
@@ -32,6 +16,7 @@ const WooCommerce = new WooCommerceRestApi({
   queryStringAuth: true, //Server SSL config
 });
 
+//Lee el archivo .xlsx
 const workbook = XLSX.readFile(
   path.join(__dirname, 'inputs', 'articulos.xlsx'),
 );
@@ -48,6 +33,7 @@ const workbookToJSON = workbook => {
 
 const workbookJSON = workbookToJSON(workbook);
 
+//Esquema para exportar a Woocommerce
 const products = workbookJSON.map((item, index) => {
   const data = {
     name: item.Descripcion,
@@ -70,6 +56,7 @@ const products = workbookJSON.map((item, index) => {
   return data;
 })
 
+//Agregando un produto
 const addProduct = (product, fileName) => {
   return new Promise(async (resolve, reject) => {
     await scrapper.getProductImg(product.name, fileName);
@@ -86,16 +73,18 @@ const addProduct = (product, fileName) => {
 
 };
 
+//Agregando todos los productos
 const addProducts = products => {
   products.reduce(
     (promise, product, index) =>
       promise.then(_ => addProduct(product, index)),
     Promise.resolve()
   )
+  scrapper.deleteProductImageAll();
 }
 
-const getProductImgAll = async products => {
-  for (let i = 0; i < products.length; i++) {
-    await scrapper.getProductImg(products[i].name, i)
-  }
-}
+//Ejemplo de un solo producto
+// addProduct(products[162], 162);
+
+//Ejemplo de todos los productos
+// addProducts(products);

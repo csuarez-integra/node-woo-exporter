@@ -1,6 +1,13 @@
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer'); //Herramienta para hacer Scrapping
 const fs = require('fs');
 const path = require('path');
+
+//Variables de entorno
+require('dotenv').config();
+
+//sftp connect
+let Client = require('ssh2-sftp-client');
+let sftp = new Client();
 
 const getProductImg = async (query, imageName) => {
   try {
@@ -18,11 +25,40 @@ const getProductImg = async (query, imageName) => {
 
     var source = await page.goto(img);
 
-    fs.mkdirSync(imgDir, { recursive: true });
+    //Conexion con el servidor
+    await sftp.connect({
+      host: process.env.SFTPHOST,
+      port: process.env.SFTPPORT,
+      username: process.env.SFTPUSER,
+      password: process.env.SFTPPASSWORD
+    }).then(async () => {
+      const path = `/clickandbuilds/${process.env.SFTPPATH}/wp-content/uploads/productos`;
+      const file = `./images/${imageName.toString()}.png`
 
-    fs.writeFile(`./images/${imageName.toString()}.png`, await source.buffer(), err => {
-      if (err) return console.log(err);
+      //Crea la carpeta y la imagen en local
+      fs.mkdirSync(imgDir, { recursive: true });
+      fs.writeFile(file, await source.buffer(), err => {
+        if (err) return console.log(err);
+      });
+
+      //Envía la imagen al servidor
+      if (sftp.exists(path)) await sftp.mkdir(path);
+      await sftp.put(file, `${path}/${imageName.toString()}.png`);
+
+      //Elimina la imagen de la carpeta local
+      fs.unlink(file, err => {
+        if (err) throw err;
+      });
+
+      //Retorna solo para registro
+      return file;
+    }).then((data) => {
+      console.log(data);
+    }).catch((err) => {
+      console.log(err, 'catch error');
     });
+
+    sftp.end();
 
     await browser.close();
 
@@ -32,4 +68,27 @@ const getProductImg = async (query, imageName) => {
   }
 };
 
+const deleteProductImageAll = async () => {
+
+  //Conexion con el servidor
+  await sftp.connect({
+    host: process.env.SFTPHOST,
+    port: process.env.SFTPPORT,
+    username: process.env.SFTPUSER,
+    password: process.env.SFTPPASSWORD
+  }).then(async () => {
+    const path = `/clickandbuilds/${process.env.SFTPPATH}/wp-content/uploads/productos`;
+
+    //Elimina el directorio entero con sus archivos
+    return sftp.rmdir(path, true);
+  }).then((data) => {
+    console.log(data);
+  }).catch((err) => {
+    console.log(err, 'catch error');
+  });
+
+  sftp.end();
+}
+
 module.exports.getProductImg = getProductImg;
+module.exports.deleteProductImageAll = deleteProductImageAll;
