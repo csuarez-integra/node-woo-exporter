@@ -1,6 +1,8 @@
 const XLSX = require('xlsx'); //Lector de excel
 const path = require('path');
 const scrapper = require('./images_scrapper'); //Scrapper de imagenes de google
+const schemas = require('./schemas')
+
 
 //Variables de entorno
 require('dotenv').config();
@@ -18,7 +20,7 @@ const WooCommerce = new WooCommerceRestApi({
 
 //Lee el archivo .xlsx
 const workbook = XLSX.readFile(
-  path.join(__dirname, 'inputs', 'articulos.xlsx'),
+  path.join(__dirname, 'inputs', 'articulos.xls'),
 );
 
 const workbookToJSON = workbook => {
@@ -34,27 +36,7 @@ const workbookToJSON = workbook => {
 const workbookJSON = workbookToJSON(workbook);
 
 //Esquema para exportar a Woocommerce
-const products = workbookJSON.map((item, index) => {
-  const data = {
-    name: item.Descripcion,
-    type: 'simple',
-    regular_price: item['PVP 1'].toString(),
-    categories: [
-      {
-        id: 1,
-      },
-    ],
-    images: [
-      {
-        src: `${process.env.URL}/wp-content/uploads/productos/${index}.png`
-      }
-    ],
-    manage_stock: true,
-    stock_quantity: item['Stock'].toString(),
-  };
-
-  return data;
-})
+const products = workbookJSON.map(schemas.tiendecita)
 
 //Agregando un produto
 const addProduct = (product, fileName) => {
@@ -84,7 +66,7 @@ const addProducts = products => {
 }
 
 //Ejemplo de un solo producto
-// addProduct(products[162], 162);
+addProduct(products[558], 558);
 
 //Ejemplo de todos los productos
 // addProducts(products);
