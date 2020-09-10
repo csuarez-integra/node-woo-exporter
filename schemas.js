@@ -13,7 +13,7 @@ const videma = (item, index) => {
         regular_price: item['PVP 1'].toString(),
         categories: [
             {
-                id: 1,
+                id: wooClient.findCategoryID(item['Familia'], categoriesList),
             },
         ],
         images: [

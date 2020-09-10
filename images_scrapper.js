@@ -14,6 +14,7 @@ const getProductImg = async (query, imageName) => {
     const imgDir = path.join(__dirname, 'images');
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
+    await page.setDefaultNavigationTimeout(0);
     await page.goto(
       `https://www.google.com/search?q=${query}&hl=en&sxsrf=ALeKk02bVoXgYpZoi0ufsHCm1g-7WFcBww:1599386737122&source=lnms&tbm=isch&sa=X&ved=2ahUKEwjX_Mvyo9TrAhXjA2MBHZCaC54Q_AUoAXoECBwQAw&biw=1536&bih=722`,
     );
@@ -65,9 +66,6 @@ const getProductImg = async (query, imageName) => {
     console.log('finished');
   } catch (error) {
     console.log(error);
-    // let log
-    // if (fs.existsSync('./log.json')) log = require('./log.json');
-    // fs.writeFileSync(path, JSON.stringify({ ...log, product: log.product + 1, exceptions: [...log.exceptions, log.log.product] }))
   }
 };
 
