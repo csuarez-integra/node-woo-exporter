@@ -15,6 +15,7 @@
     "dotenv": "^8.2.0",
     "puppeteer": "^5.2.1",
     "ssh2-sftp-client": "^5.3.0",
+    "url-exists": "^1.0.3",
     "xlsx": "^0.16.6"
   },
   "devDependencies": {

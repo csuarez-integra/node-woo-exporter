@@ -95,7 +95,7 @@ const addCategories = async categories => {
 }
 
 const listCategories = async () => {
-    if (fs.existsSync('./categories.json')) fs.unlink('./categories.json');
+    if (fs.existsSync('./categories.json')) fs.unlinkSync('./categories.json');
 
     let isThereAreNextPage = true;
     let page = 1;
