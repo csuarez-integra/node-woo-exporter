@@ -1,3 +1,9 @@
+const wooClient = require('./woocomerce');
+const fs = require('fs');
+const path = require('path');
+let categoriesList
+if (fs.existsSync('./categories.json')) categoriesList = require('./categories.json')
+
 require('dotenv').config();
 
 const videma = (item, index) => {
@@ -29,7 +35,7 @@ const tiendecita = (item, index) => {
         regular_price: item['PVP1IVA'].toString(),
         categories: [
             {
-                id: 1,
+                id: wooClient.findCategoryID(item['CLAFAM'], categoriesList),
             },
         ],
         images: [

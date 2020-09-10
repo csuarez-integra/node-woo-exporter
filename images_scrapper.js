@@ -37,7 +37,7 @@ const getProductImg = async (query, imageName) => {
 
       //Crea la carpeta y la imagen en local
       fs.mkdirSync(imgDir, { recursive: true });
-      fs.writeFile(file, await source.buffer(), err => {
+      fs.writeFileSync(file, await source.buffer(), err => {
         if (err) return console.log(err);
       });
 
@@ -65,6 +65,9 @@ const getProductImg = async (query, imageName) => {
     console.log('finished');
   } catch (error) {
     console.log(error);
+    // let log
+    // if (fs.existsSync('./log.json')) log = require('./log.json');
+    // fs.writeFileSync(path, JSON.stringify({ ...log, product: log.product + 1, exceptions: [...log.exceptions, log.log.product] }))
   }
 };
 

@@ -6,6 +6,7 @@ const tiendecita = (item, index) => {
         image: {
             src: `${process.env.URL}/wp-content/uploads/productos/c${index}.png`
         },
+        menu_order: item['CLAFAM'],
     };
 
     return data;
