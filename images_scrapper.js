@@ -44,7 +44,7 @@ const getProductImg = async (query, imageName) => {
       });
 
       //Envía la imagen al servidor
-      if (await !sftp.exists(path)) await sftp.mkdir(path);
+      if (!(await sftp.exists(path))) await sftp.mkdir(path);
       await sftp.put(file, `${path}/${imageName.toString()}.png`);
 
       //Elimina la imagen de la carpeta local
