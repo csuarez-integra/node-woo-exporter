@@ -51,3 +51,4 @@ const init = async () => {
 init()
 
 // wooClient.addProducts(products)
+

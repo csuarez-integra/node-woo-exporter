@@ -14,17 +14,18 @@ const getProductImg = async (query, imageName) => {
     const imgDir = path.join(__dirname, 'images');
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
+    const defaultImg = 'https://latiendecitadelparque.es/wp-content/uploads/2020/09/36-2.jpg'
     await page.setDefaultNavigationTimeout(0);
     await page.goto(
       `https://www.google.com/search?q=${query}&hl=en&sxsrf=ALeKk02bVoXgYpZoi0ufsHCm1g-7WFcBww:1599386737122&source=lnms&tbm=isch&sa=X&ved=2ahUKEwjX_Mvyo9TrAhXjA2MBHZCaC54Q_AUoAXoECBwQAw&biw=1536&bih=722`,
-    );
-    await page.waitForSelector('.rg_i');
+      { waitUntil: 'domcontentloaded' });
 
     const img = await page.evaluate(() => {
-      return document.querySelector('.rg_i').src;
+      if (document.querySelector('.rg_i'))
+        return document.querySelector('.rg_i').src;
     });
 
-    var source = await page.goto(img);
+    var source = await page.goto(img ? img : defaultImg);
 
     //Conexion con el servidor
     await sftp.connect({
@@ -43,7 +44,7 @@ const getProductImg = async (query, imageName) => {
       });
 
       //Envía la imagen al servidor
-      if (await sftp.exists(path)) await sftp.mkdir(path);
+      if (await !sftp.exists(path)) await sftp.mkdir(path);
       await sftp.put(file, `${path}/${imageName.toString()}.png`);
 
       //Elimina la imagen de la carpeta local

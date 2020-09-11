@@ -1,6 +1,14 @@
 const scrapper = require('./images_scrapper'); //Scrapper de imagenes de google
 const fs = require('fs');
-const path = require('path')
+const path = require('path');
+
+const urlExists = require('url-exists');
+
+const checkUrl = async url => {
+    return await urlExists(url, function (err, exists) {
+        return exists;
+    });
+}
 
 //Variables de entorno
 require('dotenv').config();
@@ -45,7 +53,10 @@ const addProducts = async products => {
         fs.writeFileSync(path, JSON.stringify({ ...log, product: i }))
     });
     while (i < products.length) {
-        sleep(6)
+        // if (await checkUrl(products[i].images[0].src)) {
+        //     products[i].images[0].src = undefined;
+        // }
+
         await addProduct(products[i], i)
         i++
     }
@@ -85,7 +96,6 @@ const addCategories = async categories => {
     });
 
     while (i < categories.length) {
-        sleep(6)
         await addCategory(categories[i], i);
         i++;
     }
